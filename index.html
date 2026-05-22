@@ -1,0 +1,1723 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Stellar Systems — Ingeniería de precisión digital</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg: #05080F;
+  --bg-2: #0A1020;
+  --panel: #0B1220;
+  --panel-2: #111A2E;
+  --line: rgba(140, 170, 220, 0.10);
+  --line-strong: rgba(140, 170, 220, 0.22);
+  --text: #F2F4F8;
+  --text-dim: #A8B3C7;
+  --text-mute: #8895AD;
+  --blue: #3D6EFF;
+  --blue-2: #5B82FF;
+  --cyan: #7CE3FF;
+  --cyan-soft: rgba(124, 227, 255, 0.14);
+  --grid: 1280px;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'ss01', 'ss02';
+}
+
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(900px 600px at 80% -10%, rgba(61,110,255,0.18), transparent 60%),
+    radial-gradient(700px 500px at 10% 30%, rgba(124,227,255,0.07), transparent 60%),
+    radial-gradient(800px 600px at 50% 110%, rgba(61,110,255,0.10), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#starfield {
+  position: fixed; inset: 0;
+  width: 100vw; height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+}
+
+#root { position: relative; z-index: 1; }
+
+.mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.eyebrow {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.eyebrow::before {
+  content: "";
+  width: 6px; height: 6px;
+  background: var(--cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--cyan);
+}
+
+.container {
+  width: min(var(--grid), 100% - 48px);
+  margin: 0 auto;
+}
+
+/* ---------- Nav ---------- */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 18px 0;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  background: linear-gradient(180deg, rgba(5,8,15,0.85), rgba(5,8,15,0.55));
+  border-bottom: 1px solid var(--line);
+}
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--text);
+}
+.brand-mark {
+  width: 32px; height: 32px;
+  position: relative;
+  flex: none;
+}
+.brand-name {
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+}
+.brand-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--text-mute);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+.nav-links {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+.nav-link {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-link:hover { color: var(--text); }
+.nav-link .num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-mute);
+}
+.nav-cta-wrap { display: flex; align-items: center; gap: 16px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 0.15s ease, background 0.2s, border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.05) inset, 0 12px 32px -10px rgba(61,110,255,0.55);
+}
+.btn-primary:hover { background: var(--blue-2); transform: translateY(-1px); }
+.btn-ghost {
+  background: rgba(255,255,255,0.02);
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.05); border-color: rgba(180,200,240,0.4); }
+.btn-arrow {
+  width: 14px; height: 14px;
+  transition: transform 0.2s;
+}
+.btn:hover .btn-arrow { transform: translate(2px, -2px); }
+
+/* ---------- Hero ---------- */
+.hero {
+  position: relative;
+  padding: 96px 0 120px;
+  overflow: hidden;
+}
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+.hero-title {
+  font-size: clamp(48px, 7vw, 96px);
+  line-height: 0.96;
+  letter-spacing: -0.035em;
+  font-weight: 500;
+  margin: 24px 0 28px;
+}
+.hero-title em {
+  font-style: normal;
+  background: linear-gradient(180deg, #FFFFFF 0%, #BFD2FF 60%, #7CE3FF 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero-sub {
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--text-dim);
+  max-width: 520px;
+  margin: 0 0 36px;
+}
+.hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.hero-meta {
+  margin-top: 64px;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.hero-meta-item .v {
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.hero-meta-item .v small {
+  font-size: 16px;
+  color: var(--text-mute);
+  margin-left: 4px;
+}
+.hero-meta-item .l {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-mute);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* ---------- Hero visual: orbit system ---------- */
+.orbit {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 560px;
+  margin-left: auto;
+}
+.orbit svg {
+  width: 100%; height: 100%;
+  overflow: visible;
+}
+.orbit-core {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 96px; height: 96px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 35%, #FFFFFF 0%, #7CE3FF 30%, #3D6EFF 65%, #0F1B3D 100%);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.1),
+    0 0 60px rgba(61,110,255,0.55),
+    0 0 140px rgba(61,110,255,0.35);
+}
+.orbit-core::after {
+  content: "";
+  position: absolute; inset: -18px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124,227,255,0.18), transparent 70%);
+}
+.orbit-label {
+  position: absolute;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+  white-space: nowrap;
+}
+.orbit-label .dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: var(--cyan);
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+  box-shadow: 0 0 10px var(--cyan);
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.orbit-rot { transform-origin: 50% 50%; animation: spin var(--dur, 60s) linear infinite; }
+.orbit-rot.rev { animation-direction: reverse; }
+
+/* ---------- Section frame ---------- */
+.section {
+  position: relative;
+  padding: 120px 0;
+}
+.section-alt {
+  background: #0A1020;
+}
+.section-head {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 48px;
+  align-items: end;
+  margin-bottom: 64px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+}
+.section-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-mute);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.section-title {
+  font-size: clamp(36px, 4.5vw, 60px);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  font-weight: 500;
+  margin: 0;
+  max-width: 900px;
+}
+.section-title .dim { color: var(--text-mute); }
+
+/* ---------- About ---------- */
+.about-grid {
+  display: grid;
+  grid-template-columns: 200px 1fr 1fr;
+  gap: 48px;
+}
+.about-lead {
+  font-size: 22px;
+  line-height: 1.45;
+  color: var(--text);
+  letter-spacing: -0.005em;
+  max-width: 520px;
+}
+.about-body {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-dim);
+  max-width: 480px;
+}
+.about-body p + p { margin-top: 14px; }
+.principles {
+  margin-top: 64px;
+  display: grid;
+  grid-template-columns: 200px 1fr 1fr 1fr;
+  gap: 48px;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+}
+.principle h4 {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.principle h4 .pn {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-mute);
+  font-size: 11px;
+}
+.principle p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+/* ---------- Services ---------- */
+.services {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+}
+.service {
+  grid-column: span 2;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 32px 28px 36px;
+  background: rgba(11, 18, 32, 0.4);
+  position: relative;
+  transition: background 0.25s;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+}
+.service.wide { grid-column: span 3; }
+.service:hover { background: rgba(17, 26, 46, 0.7); }
+.service .sicon {
+  width: 36px; height: 36px;
+  margin-bottom: 28px;
+  color: var(--cyan);
+}
+.service .sn {
+  position: absolute;
+  top: 20px; right: 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-mute);
+  letter-spacing: 0.1em;
+}
+.service h3 {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0 0 10px;
+}
+.service p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  margin: 0 0 18px;
+  flex: 1;
+}
+.service-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--text-mute);
+  padding: 4px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+/* ---------- Products ---------- */
+.products {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 56px;
+}
+.product-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.product-tab {
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  padding: 18px 16px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: color 0.15s, border-color 0.2s, background 0.2s;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.product-tab:hover { color: var(--text); background: rgba(255,255,255,0.02); }
+.product-tab.active {
+  color: var(--text);
+  border-left-color: var(--cyan);
+  background: linear-gradient(90deg, rgba(124,227,255,0.06), transparent);
+}
+.product-tab .pt-name {
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.product-tab .pt-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--text-mute);
+  text-transform: uppercase;
+}
+
+.product-card {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(17,26,46,0.6), rgba(11,18,32,0.55));
+  overflow: hidden;
+  position: relative;
+}
+.product-head {
+  padding: 28px 32px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 32px;
+  border-bottom: 1px solid var(--line);
+  position: relative;
+  z-index: 1;
+}
+.product-head h3 {
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin: 6px 0 8px;
+}
+.product-head .pcat {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--cyan);
+  text-transform: uppercase;
+}
+.product-head .pdesc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  margin: 0;
+  max-width: 460px;
+}
+.product-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: rgba(255,255,255,0.02);
+}
+.product-status .live {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #6BE9A6;
+  box-shadow: 0 0 10px #6BE9A6;
+}
+.product-body {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  position: relative;
+  z-index: 1;
+}
+.product-features {
+  padding: 32px;
+  border-right: 1px solid var(--line);
+}
+.product-features h5 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--text-mute);
+  text-transform: uppercase;
+  margin: 0 0 18px;
+  font-weight: 500;
+}
+.feat-list { list-style: none; padding: 0; margin: 0; }
+.feat-list li {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 12px;
+  padding: 10px 0;
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.5;
+  border-bottom: 1px dashed var(--line);
+}
+.feat-list li:last-child { border-bottom: none; }
+.feat-list .chk {
+  color: var(--cyan);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  margin-top: 2px;
+}
+.product-stats {
+  padding: 32px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 24px;
+  align-content: start;
+}
+.pstat {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.pstat .l {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+  margin-bottom: 6px;
+}
+.pstat .v {
+  font-size: 22px;
+  letter-spacing: -0.01em;
+  font-weight: 500;
+}
+.pstat .v small {
+  font-size: 13px;
+  color: var(--text-mute);
+  margin-left: 4px;
+  font-weight: 400;
+}
+
+/* Case-study layout */
+.product-head h3 .pclient {
+  font-weight: 400;
+  color: var(--text-dim);
+  font-size: 22px;
+  letter-spacing: -0.01em;
+}
+.case-body {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr 1fr;
+  position: relative;
+  z-index: 1;
+}
+.case-col {
+  padding: 28px 28px 32px;
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.case-col:last-child { border-right: none; }
+.case-col h5 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--cyan);
+  text-transform: uppercase;
+  margin: 0;
+  font-weight: 500;
+}
+.case-col p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  margin: 0;
+}
+.case-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+.case-list li {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 10px;
+  padding: 9px 0;
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.5;
+  border-bottom: 1px dashed var(--line);
+}
+.case-list li:last-child { border-bottom: none; }
+.case-list .chk {
+  color: var(--cyan);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  margin-top: 2px;
+}
+.case-list .chk.imp {
+  font-size: 14px;
+  font-weight: 600;
+}
+.case-stack {
+  margin-top: auto;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.case-stack .stack-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--text-mute);
+  text-transform: uppercase;
+}
+.case-stack .stack-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.product-vis {
+  position: absolute;
+  right: 16px;
+  top: 18px;
+  width: 130px; height: 130px;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* ---------- Contact ---------- */
+.contact {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 72px 64px;
+  background:
+    radial-gradient(600px 300px at 80% 0%, rgba(61,110,255,0.18), transparent 60%),
+    radial-gradient(500px 300px at 10% 100%, rgba(124,227,255,0.10), transparent 60%),
+    linear-gradient(180deg, rgba(17,26,46,0.6), rgba(11,18,32,0.6));
+  overflow: hidden;
+}
+.contact::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+  background-size: 64px 64px;
+  background-position: -1px -1px;
+  mask-image: radial-gradient(ellipse at 50% 50%, black 30%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 30%, transparent 70%);
+  opacity: 0.4;
+  pointer-events: none;
+}
+.contact-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+.contact h2 {
+  font-size: clamp(40px, 5vw, 64px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-weight: 500;
+  margin: 16px 0 20px;
+}
+.contact p {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--text-dim);
+  margin: 0 0 32px;
+  max-width: 460px;
+}
+.contact-form {
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  background: rgba(5,8,15,0.55);
+  padding: 28px;
+  backdrop-filter: blur(8px);
+}
+.contact-form .row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--text-mute);
+  text-transform: uppercase;
+}
+.field input, .field select, .field textarea {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+.field select option {
+  background: #0F1829;
+  color: var(--text);
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--cyan);
+  background: rgba(124,227,255,0.04);
+}
+.field textarea { resize: vertical; min-height: 90px; font-family: 'Space Grotesk', sans-serif; }
+.contact-form .submit {
+  margin-top: 8px;
+  width: 100%;
+  justify-content: center;
+}
+.contact-form .success {
+  margin-top: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: #6BE9A6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.contact-meta { display: flex; flex-direction: column; gap: 18px; margin-top: 8px; }
+.contact-meta-row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.contact-meta-row .ic {
+  width: 18px; height: 18px;
+  color: var(--cyan);
+  margin-top: 2px;
+}
+.contact-meta-row .l {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--text-mute);
+  text-transform: uppercase;
+}
+.contact-meta-row .v { font-size: 15px; color: var(--text); margin-top: 2px; }
+.contact-link {
+  text-decoration: none;
+  display: inline-block;
+  transition: color 0.15s;
+  font-variant-numeric: tabular-nums;
+}
+.contact-link:hover { color: var(--cyan); }
+
+/* ---------- Footer ---------- */
+.footer {
+  margin-top: 64px;
+  padding: 56px 0 36px;
+  border-top: 1px solid var(--line);
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px;
+}
+.footer h6 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--text-mute);
+  text-transform: uppercase;
+  margin: 0 0 18px;
+  font-weight: 500;
+}
+.footer ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.footer a { color: var(--text-dim); text-decoration: none; font-size: 14px; }
+.footer a:hover { color: var(--text); }
+.footer-bot {
+  margin-top: 56px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-mute);
+  letter-spacing: 0.05em;
+}
+.footer-bot .coords { display: flex; gap: 18px; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .hero-grid, .about-grid, .products, .contact-inner, .footer-grid { grid-template-columns: 1fr; }
+  .section-head { grid-template-columns: 1fr; gap: 16px; }
+  .principles { grid-template-columns: 1fr 1fr; }
+  .services { grid-template-columns: 1fr 1fr; }
+  .service, .service.wide { grid-column: span 1; }
+  .product-body { grid-template-columns: 1fr; }
+  .product-features { border-right: none; border-bottom: 1px solid var(--line); }
+  .case-body { grid-template-columns: 1fr; }
+  .case-col { border-right: none; border-bottom: 1px solid var(--line); }
+  .case-col:last-child { border-bottom: none; }
+  .contact { padding: 40px 28px; }
+  .nav-links { display: none; }
+  .orbit { max-width: 380px; margin: 0 auto; }
+}
+
+</style>
+</head>
+<body>
+<canvas id="starfield" aria-hidden="true"></canvas>
+<div id="root"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init('TZorUJgCSpSwZxB0g');</script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script>
+// Subtle starfield — drawn once per resize, gentle parallax drift on scroll.
+(function () {
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let scrollY = 0;
+
+  function seed() {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    const count = Math.floor((w * h) / 5200);
+    stars = [];
+    for (let i = 0; i < count; i++) {
+      const layer = Math.random() < 0.7 ? 0 : (Math.random() < 0.7 ? 1 : 2);
+      stars.push({
+        x: Math.random() * w,
+        y: Math.random() * h * 2.4,
+        r: layer === 2 ? Math.random() * 1.3 + 0.7 : layer === 1 ? Math.random() * 0.9 + 0.4 : Math.random() * 0.6 + 0.2,
+        a: layer === 2 ? 0.85 : layer === 1 ? 0.55 : 0.3,
+        layer,
+        tw: Math.random() * Math.PI * 2,
+      });
+    }
+  }
+
+  function draw(t) {
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+    for (const s of stars) {
+      const parY = s.y - scrollY * (s.layer === 2 ? 0.25 : s.layer === 1 ? 0.12 : 0.05);
+      const y = ((parY % (window.innerHeight * 2.4)) + window.innerHeight * 2.4) % (window.innerHeight * 2.4);
+      if (y > window.innerHeight + 4) continue;
+      const flicker = s.layer === 2 ? 0.7 + Math.sin(t * 0.0009 + s.tw) * 0.3 : 1;
+      ctx.globalAlpha = s.a * flicker;
+      ctx.fillStyle = s.layer === 2 ? '#cfe3ff' : '#9fb4d8';
+      ctx.beginPath();
+      ctx.arc(s.x * dpr, y * dpr, s.r * dpr, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', seed);
+  window.addEventListener('scroll', () => { scrollY = window.scrollY; }, { passive: true });
+  seed();
+  requestAnimationFrame(draw);
+})();
+</script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+/* ───── Iconography (line, 1.5px) ───── */
+const Icon = ({ d, size = 20, stroke = 1.5, ...rest }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" strokeWidth={stroke}
+       strokeLinecap="round" strokeLinejoin="round" {...rest}>
+    {d}
+  </svg>
+);
+
+const IconArrow = (p) => <Icon {...p} d={<>
+  <path d="M7 17 17 7" /><path d="M8 7h9v9" />
+</>} />;
+const IconCode = (p) => <Icon {...p} d={<>
+  <path d="m8 8-5 4 5 4" /><path d="m16 8 5 4-5 4" /><path d="m14 4-4 16" />
+</>} />;
+const IconLayers = (p) => <Icon {...p} d={<>
+  <path d="M12 3 2 8l10 5 10-5z" /><path d="m2 13 10 5 10-5" /><path d="m2 18 10 5 10-5" />
+</>} />;
+const IconLink = (p) => <Icon {...p} d={<>
+  <path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 1 0-7-7l-1 1" />
+  <path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1" />
+</>} />;
+const IconPlug = (p) => <Icon {...p} d={<>
+  <path d="M9 2v6" /><path d="M15 2v6" /><path d="M6 8h12v4a6 6 0 0 1-12 0z" /><path d="M12 18v4" />
+</>} />;
+const IconCompass = (p) => <Icon {...p} d={<>
+  <circle cx="12" cy="12" r="9" /><path d="m15 9-4 2-2 4 4-2z" />
+</>} />;
+const IconMail = (p) => <Icon {...p} d={<>
+  <rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" />
+</>} />;
+const IconPin = (p) => <Icon {...p} d={<>
+  <path d="M12 22s8-7 8-13a8 8 0 1 0-16 0c0 6 8 13 8 13z" /><circle cx="12" cy="9" r="3" />
+</>} />;
+const IconCall = (p) => <Icon {...p} d={<>
+  <path d="M5 4h4l2 5-3 2a12 12 0 0 0 5 5l2-3 5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" />
+</>} />;
+
+/* ───── Brand Mark ───── */
+const BrandMark = ({ size = 32 }) => (
+  <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
+    <circle cx="16" cy="16" r="14.5" stroke="rgba(180,200,240,0.3)" />
+    <ellipse cx="16" cy="16" rx="14.5" ry="6" stroke="rgba(180,200,240,0.4)" transform="rotate(-20 16 16)" />
+    <circle cx="16" cy="16" r="3.5" fill="url(#bmGrad)" />
+    <circle cx="28" cy="10" r="1.2" fill="#7CE3FF" />
+    <defs>
+      <radialGradient id="bmGrad" cx="0.35" cy="0.35" r="0.8">
+        <stop offset="0" stopColor="#FFFFFF" />
+        <stop offset="0.5" stopColor="#7CE3FF" />
+        <stop offset="1" stopColor="#3D6EFF" />
+      </radialGradient>
+    </defs>
+  </svg>
+);
+
+/* ───── Nav ───── */
+const Nav = () => {
+  const links = [
+    { num: '01', label: 'Nosotros', href: '#about' },
+    { num: '02', label: 'Servicios', href: '#services' },
+    { num: '03', label: 'Proyectos', href: '#products' },
+    { num: '04', label: 'Contacto', href: '#contact' },
+  ];
+  return (
+    <nav className="nav">
+      <div className="container nav-inner">
+        <a href="#top" className="brand">
+          <div className="brand-mark"><BrandMark /></div>
+          <div>
+            <div className="brand-name">Stellar Systems</div>
+            <div className="brand-sub">SS · EST. 2014</div>
+          </div>
+        </a>
+        <div className="nav-links">
+          {links.map(l => (
+            <a key={l.label} href={l.href} className="nav-link">
+              <span className="num">{l.num}</span>{l.label}
+            </a>
+          ))}
+        </div>
+        <div className="nav-cta-wrap">
+          <a href="#contact" className="btn btn-primary">
+            Conversemos
+            <IconArrow size={14} className="btn-arrow" />
+          </a>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+/* ───── Hero Orbit System ───── */
+const OrbitSystem = () => (
+  <div className="orbit">
+    <svg viewBox="-200 -200 400 400">
+      <defs>
+        <radialGradient id="haze" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stopColor="rgba(124,227,255,0.18)" />
+          <stop offset="1" stopColor="rgba(124,227,255,0)" />
+        </radialGradient>
+      </defs>
+      <circle cx="0" cy="0" r="180" fill="url(#haze)" />
+      {/* Orbit rings */}
+      {[60, 110, 165].map((r, i) => (
+        <ellipse key={i} cx="0" cy="0" rx={r} ry={r * 0.42}
+          stroke="rgba(140,170,220,0.22)" strokeWidth="0.8" fill="none"
+          transform={`rotate(${-18 + i * 4})`} strokeDasharray={i === 1 ? '2 4' : 'none'} />
+      ))}
+      {/* Tick marks on outer */}
+      {Array.from({ length: 36 }).map((_, i) => {
+        const a = (i / 36) * Math.PI * 2;
+        const r1 = 188, r2 = 194;
+        return <line key={i}
+          x1={Math.cos(a) * r1} y1={Math.sin(a) * r1}
+          x2={Math.cos(a) * r2} y2={Math.sin(a) * r2}
+          stroke="rgba(140,170,220,0.2)" strokeWidth="0.6" />;
+      })}
+      {/* Crosshair */}
+      <line x1="-198" y1="0" x2="-184" y2="0" stroke="rgba(124,227,255,0.5)" strokeWidth="1" />
+      <line x1="198" y1="0" x2="184" y2="0" stroke="rgba(124,227,255,0.5)" strokeWidth="1" />
+      <line x1="0" y1="-198" x2="0" y2="-184" stroke="rgba(124,227,255,0.5)" strokeWidth="1" />
+      <line x1="0" y1="198" x2="0" y2="184" stroke="rgba(124,227,255,0.5)" strokeWidth="1" />
+
+      {/* Rotating orbits */}
+      <g className="orbit-rot" style={{ '--dur': '40s' }}>
+        <g transform="rotate(-18) translate(60 0)">
+          <circle r="5" fill="#7CE3FF" />
+          <circle r="12" fill="none" stroke="rgba(124,227,255,0.4)" />
+        </g>
+      </g>
+      <g className="orbit-rot rev" style={{ '--dur': '70s' }}>
+        <g transform="rotate(-14) translate(110 0)">
+          <circle r="4" fill="#5B82FF" />
+        </g>
+      </g>
+      <g className="orbit-rot" style={{ '--dur': '110s' }}>
+        <g transform="rotate(-10) translate(165 0)">
+          <circle r="3.5" fill="#A8B3C7" />
+          <circle r="9" fill="none" stroke="rgba(168,179,199,0.3)" strokeDasharray="2 3" />
+        </g>
+      </g>
+
+      {/* Static reference points */}
+      <circle cx="-145" cy="-60" r="1.2" fill="#FFFFFF" opacity="0.7" />
+      <circle cx="130" cy="-90" r="1.5" fill="#FFFFFF" opacity="0.9" />
+      <circle cx="40" cy="155" r="1" fill="#FFFFFF" opacity="0.6" />
+    </svg>
+    <div className="orbit-core"></div>
+    <div className="orbit-label" style={{ top: '8%', right: '4%' }}>
+      <span className="dot"></span>Antares
+    </div>
+    <div className="orbit-label" style={{ top: '40%', right: '-2%' }}>
+      <span className="dot"></span>Zosma
+    </div>
+    <div className="orbit-label" style={{ bottom: '22%', left: '0%' }}>
+      <span className="dot"></span>Bellatrix
+    </div>
+    <div className="orbit-label" style={{ bottom: '4%', right: '8%' }}>
+      <span className="dot"></span>Daylight
+    </div>
+  </div>
+);
+
+/* ───── Hero ───── */
+const Hero = () => (
+  <section className="hero" id="top">
+    <div className="container hero-grid">
+      <div>
+        <span className="eyebrow">Stellar Systems · Ingeniería de software</span>
+        <h1 className="hero-title">
+          Software a medida para empresas que necesitan <em>operar sin caos.</em>
+        </h1>
+        <p className="hero-sub">
+          Construimos ERPs, sistemas de gestión e integraciones en industrias muy distintas —
+          desde despachos legales hasta plantas de manufactura.
+        </p>
+        <div className="hero-ctas">
+          <a href="#contact" className="btn btn-primary">
+            Conversemos <IconArrow size={14} className="btn-arrow" />
+          </a>
+          <a href="#products" className="btn btn-ghost">
+            Ver nuestros proyectos <IconArrow size={14} className="btn-arrow" />
+          </a>
+        </div>
+        <div className="hero-meta">
+          <div className="hero-meta-item">
+            <div className="v">4</div>
+            <div className="l">Sistemas en producción</div>
+          </div>
+          <div className="hero-meta-item">
+            <div className="v">4</div>
+            <div className="l">Industrias atendidas</div>
+          </div>
+          <div className="hero-meta-item">
+            <div className="v">100<small>%</small></div>
+            <div className="l">Desarrollo a medida</div>
+          </div>
+        </div>
+      </div>
+      <OrbitSystem />
+    </div>
+  </section>
+);
+
+/* ───── About ───── */
+const About = () => (
+  <section className="section section-alt" id="about">
+    <div className="container">
+      <div className="section-head">
+        <div className="section-num">01 / Nosotros</div>
+        <h2 className="section-title">
+          Equipo de ingeniería de software enfocado en construir <span className="dim">sistemas que el negocio realmente usa todos los días.</span>
+        </h2>
+      </div>
+      <div className="about-grid">
+        <div></div>
+        <p className="about-lead">
+          Diseñamos y desarrollamos plataformas web a medida: ERPs, sistemas de gestión,
+          control de operaciones e integraciones para empresas que necesitan ordenar
+          y escalar su operación.
+        </p>
+        <div className="about-body">
+          <p>
+            Trabajamos de extremo a extremo: escuchamos al cliente, levantamos el problema,
+            proponemos la solución, la construimos y la acompañamos en producción. Nada de
+            entregas que dejen al cliente a la deriva.
+          </p>
+          <p>
+            Nuestros proyectos viven en industrias distintas —instalaciones eléctricas,
+            restaurantes, despachos legales, manufactura— pero comparten un mismo
+            objetivo: convertir procesos manuales y dispersos en software confiable.
+          </p>
+        </div>
+      </div>
+      <div className="principles">
+        <div className="section-num" style={{ alignSelf: 'start' }}>Principios</div>
+        <div className="principle">
+          <h4><span className="pn">P.01</span> Entender antes de codificar</h4>
+          <p>Cada proyecto empieza escuchando cómo opera realmente el negocio. Nuestro software se ajusta al proceso, no al revés.</p>
+        </div>
+        <div className="principle">
+          <h4><span className="pn">P.02</span> Soluciones que escalan</h4>
+          <p>Construimos pensando en cómo se verá la operación en uno o dos años, no sólo en el MVP de la próxima semana.</p>
+        </div>
+        <div className="principle">
+          <h4><span className="pn">P.03</span> Acompañamiento en producción</h4>
+          <p>La entrega no termina al lanzar. Capacitamos al equipo, documentamos el sistema y damos soporte mientras se estabiliza.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+/* ───── Services ───── */
+const SERVICES = [
+  {
+    n: 'S.01', icon: IconCode, w: 'wide',
+    title: 'Desarrollo de software a medida',
+    desc: 'Plataformas web, herramientas internas y sistemas de gestión construidos desde cero según cómo opera realmente tu negocio.',
+    tags: ['React', 'Node.js', 'TypeScript', 'PostgreSQL'],
+  },
+  {
+    n: 'S.02', icon: IconLayers,
+    title: 'ERPs y sistemas de operación',
+    desc: 'ERPs y sistemas de gestión que unifican producción, inventario, ventas y administración en una sola plataforma.',
+    tags: ['ERP', 'Inventario', 'Producción'],
+  },
+  {
+    n: 'S.03', icon: IconPlug,
+    title: 'Integraciones empresariales',
+    desc: 'Conexión entre sistemas existentes, facturación electrónica y servicios de terceros para que la información fluya sin retrabajo.',
+    tags: ['CFDI', 'APIs', 'Webhooks'],
+  },
+  {
+    n: 'S.04', icon: IconLink, w: 'wide',
+    title: 'Sitios web institucionales y portales',
+    desc: 'Sitios y portales para captación y comunicación con clientes, diseñados con la misma seriedad técnica que un sistema interno.',
+    tags: ['Sitio web', 'Portal cliente', 'SEO'],
+  },
+  {
+    n: 'S.05', icon: IconCompass,
+    title: 'Consultoría técnica',
+    desc: 'Diagnóstico de procesos, diseño de soluciones y acompañamiento a equipos que necesitan tomar decisiones técnicas importantes. Nuestro equipo se integra a tu operación.',
+    tags: ['Diagnóstico', 'Arquitectura', 'Acompañamiento'],
+  },
+];
+
+const Services = () => (
+  <section className="section" id="services">
+    <div className="container">
+      <div className="section-head">
+        <div className="section-num">02 / Servicios</div>
+        <h2 className="section-title">
+          Cinco áreas de trabajo, <span className="dim">una sola forma de construir.</span>
+        </h2>
+      </div>
+      <div className="services">
+        {SERVICES.map(s => (
+          <div className={`service ${s.w || ''}`} key={s.n}>
+            <span className="sn">{s.n}</span>
+            <s.icon size={28} stroke={1.4} className="sicon" />
+            <h3>{s.title}</h3>
+            <p>{s.desc}</p>
+            <div className="service-tags">
+              {s.tags.map(t => <span key={t} className="tag">{t}</span>)}
+            </div>
+          </div>
+        ))}
+        <div className="service" style={{ background: 'transparent' }}>
+          <span className="sn">↗</span>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end' }}>
+            <div>
+              <h3 style={{ color: 'var(--cyan)' }}>¿No estás seguro de qué necesitas?</h3>
+              <p>Cuéntanos el problema. Te ayudamos a dimensionarlo.</p>
+              <a href="#contact" className="btn btn-ghost" style={{ marginTop: 8 }}>
+                Agendar una llamada <IconArrow size={14} className="btn-arrow" />
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+/* ───── Products ───── */
+const PRODUCTS = [
+  {
+    id: 'antares',
+    name: 'Antares',
+    client: 'Doble I Doble E',
+    industry: 'Instalaciones eléctricas',
+    designation: 'CASO·01',
+    status: 'En producción',
+    summary: 'Sistema de cotizaciones para proyectos eléctricos que reemplazó hojas de cálculo y catálogos en papel por un flujo digital de punta a punta.',
+    problem: 'Las cotizaciones se armaban a mano en Excel y Word a partir de catálogos físicos. Cada propuesta tomaba uno o dos días, los precios quedaban desactualizados y era fácil perder margen por errores de cálculo o materiales mal contabilizados.',
+    solutionLead: 'Construí una plataforma web que centraliza catálogo de materiales y mano de obra, calcula el costo en tiempo real y entrega cotizaciones profesionales en PDF listas para enviar al cliente.',
+    solution: [
+      'Catálogo de materiales con precios versionados',
+      'Estimación de mano de obra por tipo de instalación',
+      'Generación automática de PDF con la marca del cliente',
+      'Historial, duplicación y plantillas reutilizables',
+    ],
+    impact: [
+      'Tiempo de cotización reducido de días a minutos',
+      'Margen protegido por cálculo automático y precios centralizados',
+      'Imagen más profesional ante el cliente final',
+    ],
+    stack: ['React', 'Node.js', 'PostgreSQL', 'PDF'],
+  },
+  {
+    id: 'zosma',
+    name: 'Zosma',
+    client: 'Paella Deluxe',
+    industry: 'Restaurante · paella',
+    designation: 'CASO·02',
+    status: 'En producción',
+    summary: 'Sistema integral de operación que cubre pedidos, compras y ventas, dando visibilidad completa del negocio desde un solo lugar.',
+    problem: 'Pedidos, compras de insumos y ventas se llevaban en libretas y hojas sueltas. No había visibilidad de inventario, ni del costo real por plato, ni reportes confiables al cierre del día.',
+    solutionLead: 'Diseñé un sistema que cubre el ciclo completo del restaurante: levantamiento de pedidos, gestión de compras, control de ventas y cierre operativo.',
+    solution: [
+      'Módulo de pedidos en piso y para llevar',
+      'Control de compras de insumos y proveedores',
+      'Cierre diario de ventas y cuadre de caja',
+      'Reportes de productos más vendidos y costos',
+    ],
+    impact: [
+      'Visibilidad total de ventas, costos e inventario en tiempo real',
+      'Cierres de caja más rápidos y sin errores',
+      'Decisiones de compra basadas en datos, no en intuición',
+    ],
+    stack: ['React', 'Node.js', 'MySQL', 'POS'],
+  },
+  {
+    id: 'bellatrix',
+    name: 'Bellatrix',
+    client: 'Nelly Espinoza Service',
+    industry: 'Despacho · derecho migratorio',
+    designation: 'CASO·03',
+    status: 'En producción',
+    summary: 'Plataforma de control de expedientes migratorios acompañada de un sitio web institucional para captación de clientes.',
+    problem: 'Los expedientes vivían en carpetas físicas y archivos dispersos. Dar seguimiento al avance de cada caso, vencimientos y documentos pendientes era lento y propenso a errores. Además, el despacho carecía de presencia digital profesional.',
+    solutionLead: 'Desarrollé un sistema interno de gestión de expedientes con bitácora por caso y alertas de fechas críticas, complementado con un sitio web institucional para captación.',
+    solution: [
+      'Expediente digital por cliente con histórico de movimientos',
+      'Alertas de vencimientos, citas y trámites',
+      'Carga y consulta segura de documentos',
+      'Sitio institucional con servicios y formulario de contacto',
+    ],
+    impact: [
+      'Trazabilidad completa de cada caso',
+      'Cero documentos perdidos en el flujo de trabajo',
+      'Captación profesional de nuevos clientes vía web',
+    ],
+    stack: ['React', 'Node.js', 'PostgreSQL', 'Storage'],
+  },
+  {
+    id: 'daylight',
+    name: 'Daylight',
+    client: 'Daylight Corrugated System',
+    industry: 'Maquiladora · cartón corrugado',
+    designation: 'CASO·04',
+    status: 'En producción',
+    summary: 'ERP completo para una planta de cartón corrugado que unifica los procesos operativos y administrativos en un solo sistema.',
+    problem: 'La operación trabajaba fragmentada entre múltiples sistemas y archivos sueltos. Órdenes de producción, inventario, compras, cuentas y facturación vivían aislados, generando retrabajo, datos inconsistentes y reportes que llegaban tarde.',
+    solutionLead: 'Construí un ERP integrado que conecta los procesos de planta con los administrativos y ofrece una vista única del negocio en tiempo real.',
+    solution: [
+      'Órdenes de producción y seguimiento en piso',
+      'Inventario de materia prima y producto terminado',
+      'Compras, cuentas por pagar y por cobrar',
+      'Facturación electrónica y reportes gerenciales',
+    ],
+    impact: [
+      'Procesos unificados y datos consistentes en toda la planta',
+      'Visibilidad gerencial en tiempo real',
+      'Menos retrabajo y errores entre áreas',
+    ],
+    stack: ['React', 'Node.js', 'PostgreSQL', 'ERP'],
+  },
+];
+
+const ProductVis = ({ id }) => {
+  if (id === 'antares') return (
+    <svg viewBox="0 0 100 100" width="100%" height="100%">
+      <circle cx="50" cy="50" r="6" fill="#7CE3FF" opacity="0.9"/>
+      <circle cx="50" cy="50" r="14" fill="none" stroke="rgba(124,227,255,0.6)" />
+      <circle cx="50" cy="50" r="28" fill="none" stroke="rgba(124,227,255,0.35)" strokeDasharray="2 3"/>
+      <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(124,227,255,0.18)" />
+      {[0, 72, 144, 216, 288].map((a, i) => {
+        const r = i % 2 ? 28 : 44;
+        const x = 50 + Math.cos((a - 90) * Math.PI / 180) * r;
+        const y = 50 + Math.sin((a - 90) * Math.PI / 180) * r;
+        return <circle key={i} cx={x} cy={y} r="2" fill="#7CE3FF" />;
+      })}
+    </svg>
+  );
+  if (id === 'bellatrix') return (
+    <svg viewBox="0 0 100 100" width="100%" height="100%">
+      {[20, 50, 80].map((y, i) => (
+        <g key={i}>
+          <line x1="10" y1={y} x2="90" y2={y} stroke="rgba(140,170,220,0.3)" strokeDasharray="2 3"/>
+          <circle cx="10" cy={y} r="3" fill="#5B82FF"/>
+          <circle cx="90" cy={y} r="3" fill="#7CE3FF"/>
+          <circle cx={30 + i * 8} cy={y} r="1.5" fill="#F2F4F8"/>
+        </g>
+      ))}
+      <line x1="10" y1="20" x2="90" y2="80" stroke="rgba(124,227,255,0.4)"/>
+      <line x1="10" y1="80" x2="90" y2="20" stroke="rgba(124,227,255,0.4)"/>
+    </svg>
+  );
+  if (id === 'daylight') return (
+    <svg viewBox="0 0 100 100" width="100%" height="100%">
+      {/* corrugated stacked layers */}
+      {[24, 38, 52, 66, 80].map((y, i) => (
+        <g key={i}>
+          <line x1="10" y1={y} x2="90" y2={y}
+            stroke={i % 2 ? 'rgba(124,227,255,0.55)' : 'rgba(91,130,255,0.35)'}
+            strokeWidth="0.9" />
+          {Array.from({ length: 8 }).map((_, j) => (
+            <line key={j} x1={14 + j * 10} y1={y - 3} x2={14 + j * 10 + 4} y2={y + 3}
+              stroke="rgba(140,170,220,0.35)" strokeWidth="0.6" />
+          ))}
+        </g>
+      ))}
+      <rect x="10" y="18" width="80" height="68" fill="none" stroke="rgba(140,170,220,0.4)"/>
+      <circle cx="86" cy="22" r="2" fill="#7CE3FF"/>
+    </svg>
+  );
+  return (
+    <svg viewBox="0 0 100 100" width="100%" height="100%">
+      <circle cx="50" cy="50" r="34" fill="none" stroke="rgba(140,170,220,0.25)" />
+      {Array.from({ length: 12 }).map((_, i) => {
+        const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+        const x = 50 + Math.cos(a) * 34;
+        const y = 50 + Math.sin(a) * 34;
+        return <circle key={i} cx={x} cy={y} r={i % 3 ? 1.2 : 2.4}
+          fill={i % 3 ? '#A8B3C7' : '#7CE3FF'} />;
+      })}
+      <polygon points="50,30 64,55 36,55" fill="none" stroke="#7CE3FF" strokeWidth="1.2"/>
+      <circle cx="50" cy="50" r="3" fill="#7CE3FF"/>
+    </svg>
+  );
+};
+
+const Products = () => {
+  const [active, setActive] = useState('antares');
+  const p = PRODUCTS.find(x => x.id === active);
+  return (
+    <section className="section section-alt" id="products">
+      <div className="container">
+        <div className="section-head">
+          <div className="section-num">03 / Proyectos</div>
+          <h2 className="section-title">
+            Cuatro casos de éxito <span className="dim">en industrias muy distintas, resolviendo problemas reales de negocio.</span>
+          </h2>
+        </div>
+        <div className="products">
+          <div className="product-list">
+            {PRODUCTS.map(prod => (
+              <button key={prod.id}
+                className={`product-tab ${prod.id === active ? 'active' : ''}`}
+                onClick={() => setActive(prod.id)}>
+                <span className="pt-name">{prod.name}</span>
+                <span className="pt-meta">{prod.designation} · {prod.client}</span>
+              </button>
+            ))}
+          </div>
+          <div className="product-card">
+            <div className="product-vis"><ProductVis id={p.id} /></div>
+            <div className="product-head">
+              <div>
+                <div className="pcat">{p.industry} · {p.designation}</div>
+                <h3>{p.name} <span className="pclient">— {p.client}</span></h3>
+                <p className="pdesc">{p.summary}</p>
+              </div>
+              <span className="product-status"><span className="live"></span>{p.status}</span>
+            </div>
+            <div className="case-body">
+              <div className="case-col">
+                <h5>El problema</h5>
+                <p>{p.problem}</p>
+              </div>
+              <div className="case-col">
+                <h5>La solución</h5>
+                <p>{p.solutionLead}</p>
+                <ul className="case-list">
+                  {p.solution.map((f, i) => (
+                    <li key={i}><span className="chk">[{String(i + 1).padStart(2, '0')}]</span>{f}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="case-col">
+                <h5>El impacto</h5>
+                <ul className="case-list impact">
+                  {p.impact.map((f, i) => (
+                    <li key={i}><span className="chk imp">→</span>{f}</li>
+                  ))}
+                </ul>
+                <div className="case-stack">
+                  <span className="stack-label">Stack</span>
+                  <div className="stack-tags">
+                    {p.stack.map(t => <span key={t} className="tag">{t}</span>)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+/* ───── Contact ───── */
+const Contact = () => {
+  const [status, setStatus] = useState('idle'); // idle | sending | sent | error
+  const formRef = useRef(null);
+
+  const submit = (e) => {
+    e.preventDefault();
+    setStatus('sending');
+    const form = formRef.current;
+    emailjs.send('service_7r1ysk9', 'template_p4r5wtq', {
+      from_name:    form.from_name.value,
+      from_email:   form.from_email.value,
+      phone:        form.phone.value,
+      company:      form.company.value,
+      project_type: form.project_type.value,
+      message:      form.message.value,
+    }).then(() => {
+      setStatus('sent');
+      form.reset();
+      setTimeout(() => setStatus('idle'), 5000);
+    }).catch(() => {
+      setStatus('error');
+      setTimeout(() => setStatus('idle'), 5000);
+    });
+  };
+
+  return (
+    <section className="section" id="contact">
+      <div className="container">
+        <div className="section-head">
+          <div className="section-num">04 / Contacto</div>
+          <h2 className="section-title">
+            Cuéntanos tu proyecto. <span className="dim">Construyamos algo que tu negocio realmente use.</span>
+          </h2>
+        </div>
+        <div className="contact">
+          <div className="contact-inner">
+            <div>
+              <span className="eyebrow">Disponible para nuevos proyectos</span>
+              <h2>Hablemos por teléfono.</h2>
+              <p>
+                Una llamada de 30 minutos es la mejor forma de entender qué estás
+                buscando construir. Respondemos el mismo día con una propuesta inicial
+                y los próximos pasos.
+              </p>
+              <div className="contact-meta">
+                <div className="contact-meta-row">
+                  <IconCall className="ic" />
+                  <div>
+                    <div className="l">Teléfono · directo</div>
+                    <a className="v contact-link" href="tel:+526564370911">656 437 0911</a>
+                  </div>
+                </div>
+                <div className="contact-meta-row">
+                  <IconCall className="ic" />
+                  <div>
+                    <div className="l">Teléfono · WhatsApp</div>
+                    <a className="v contact-link" href="tel:+526563112378">656 311 2378</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <form className="contact-form" ref={formRef} onSubmit={submit}>
+              <div className="row">
+                <div className="field">
+                  <label>Nombre completo</label>
+                  <input name="from_name" type="text" placeholder="Ada Lovelace" required />
+                </div>
+                <div className="field">
+                  <label>Correo corporativo</label>
+                  <input name="from_email" type="email" placeholder="ada@empresa.com" required />
+                </div>
+              </div>
+              <div className="row">
+                <div className="field">
+                  <label>Empresa</label>
+                  <input name="company" type="text" placeholder="Acme S.A." />
+                </div>
+                <div className="field">
+                  <label>Teléfono</label>
+                  <input name="phone" type="tel" placeholder="+52 656 000 0000" />
+                </div>
+              </div>
+              <div className="row">
+                <div className="field" style={{ gridColumn: 'span 2' }}>
+                  <label>Tipo de proyecto</label>
+                  <select name="project_type" defaultValue="">
+                    <option value="" disabled>Selecciona…</option>
+                    <option>Software a medida</option>
+                    <option>Sistemas distribuidos</option>
+                    <option>Integración empresarial</option>
+                    <option>Plataforma de APIs</option>
+                    <option>Consultoría / asesoría</option>
+                  </select>
+                </div>
+              </div>
+              <div className="field" style={{ marginBottom: 6 }}>
+                <label>Brief del proyecto</label>
+                <textarea name="message" placeholder="Unas líneas sobre qué estás construyendo, los plazos y los sistemas involucrados."></textarea>
+              </div>
+              <button type="submit" className="btn btn-primary submit" disabled={status === 'sending'}>
+                {status === 'sending' ? 'Enviando…' : <>Enviar mensaje <IconArrow size={14} className="btn-arrow" /></>}
+              </button>
+              {status === 'sent' && (
+                <div className="success">
+                  ✓ Recibido. Te responderemos el mismo día.
+                </div>
+              )}
+              {status === 'error' && (
+                <div className="success" style={{ color: '#FF6B6B' }}>
+                  ✕ Algo salió mal. Intenta de nuevo o escríbenos por WhatsApp.
+                </div>
+              )}
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+/* ───── Footer ───── */
+const Footer = () => (
+  <footer className="footer">
+    <div className="container">
+      <div className="footer-grid">
+        <div>
+          <a href="#top" className="brand">
+            <div className="brand-mark"><BrandMark /></div>
+            <div>
+              <div className="brand-name">Stellar Systems</div>
+              <div className="brand-sub">SS · EST. 2014</div>
+            </div>
+          </a>
+          <p style={{ marginTop: 18, color: 'var(--text-dim)', fontSize: 14, maxWidth: 320, lineHeight: 1.6 }}>
+            Equipo de ingeniería de software a medida. Construimos sistemas de gestión, ERPs
+            e integraciones para empresas que necesitan ordenar su operación.
+          </p>
+        </div>
+        <div>
+          <h6>Servicios</h6>
+          <ul>
+            <li><a href="#services">Software a medida</a></li>
+            <li><a href="#services">ERPs y operación</a></li>
+            <li><a href="#services">Integraciones</a></li>
+            <li><a href="#services">Sitios institucionales</a></li>
+            <li><a href="#services">Consultoría</a></li>
+          </ul>
+        </div>
+        <div>
+          <h6>Proyectos</h6>
+          <ul>
+            <li><a href="#products">Antares · Doble I Doble E</a></li>
+            <li><a href="#products">Zosma · Paella Deluxe</a></li>
+            <li><a href="#products">Bellatrix · Nelly Espinoza</a></li>
+            <li><a href="#products">Daylight · Corrugated System</a></li>
+          </ul>
+        </div>
+        <div>
+          <h6>Contacto</h6>
+          <ul>
+            <li><a href="tel:+526564370911">656 437 0911</a></li>
+            <li><a href="tel:+526563112378">656 311 2378</a></li>
+            <li><a href="#about">Nosotros</a></li>
+            <li><a href="#contact">Cuéntanos tu proyecto</a></li>
+          </ul>
+        </div>
+      </div>
+      <div className="footer-bot">
+        <span>© 2026 Stellar Systems · Todos los derechos reservados.</span>
+        <span className="coords">
+          <span>Ciudad Juárez, Chih.</span>
+          <span>MX</span>
+          <span>SS·DEV-001</span>
+        </span>
+      </div>
+    </div>
+  </footer>
+);
+
+/* ───── App ───── */
+const App = () => (
+  <>
+    <Nav />
+    <Hero />
+    <About />
+    <Services />
+    <Products />
+    <Contact />
+    <Footer />
+  </>
+);
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+
+</script>
+</body>
+</html>
